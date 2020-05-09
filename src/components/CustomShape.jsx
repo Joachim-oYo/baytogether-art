@@ -1,8 +1,8 @@
 import React from 'react';
-import { Star } from 'react-konva';
+import { Shape } from 'react-konva';
 
 
-const Stars = props => {
+const CustomShape = props => {
     return (
         <div>
             <Star
@@ -26,4 +26,4 @@ const Stars = props => {
     );
 }
 
-export default Stars;
+export default CustomShape;

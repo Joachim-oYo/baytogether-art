@@ -10,16 +10,17 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-konva": "^16.13.0-0",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "use-image": "^1.0.5"
   },
-"scripts": {    
-   "start": "react-scripts start",
-   "predeploy": "npm run build",
-   "deploy": "gh-pages -d build",
-   "build": "react-scripts build",
-   "test": "react-scripts test",
-   "eject": "react-scripts eject"
-},
+  "scripts": {
+    "start": "react-scripts start",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "eslintConfig": {
     "extends": "react-app"
   },

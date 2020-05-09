@@ -1,8 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { render } from 'react-dom';
 import './App.css';
-import Stars from './components/Stars';
 import Konva from 'konva';
-import { Stage, Layer, Star, Text } from 'react-konva';
+import { Stage, Layer, Star, Text, Image, Transformer } from 'react-konva';
+import useImage from 'use-image';
+
+const MyImage = props => {
+  const [image] = useImage('https://www.stickpng.com/assets/images/5847f9cbcef1014c0b5e48c8.png');
+  return <Image image={image} x={300} draggable={true} scale={0.2} onSelect={() => console.log('selected')} onChange={() => console.log('changed')} />
+}
 
 const App = () => {
   const handleDragStart = e => {
@@ -20,7 +26,7 @@ const App = () => {
   };
   const handleDragEnd = e => {
     e.target.setAttrs({
-    shadowOpacity: 0
+      shadowOpacity: 0
     });
     e.target.to({
       duration: 0.5,
@@ -52,6 +58,7 @@ const App = () => {
             onDragEnd={handleDragEnd}
           />
         ))}
+        <MyImage />
       </Layer>
     </Stage>
   );
