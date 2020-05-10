@@ -2,19 +2,28 @@ import React, { useEffect } from 'react';
 import { render } from 'react-dom';
 import './App.css';
 import Konva from 'konva';
-import { Stage, Layer, Star, Text, Image, Transformer } from 'react-konva';
+import { Stage, Layer, Star, Text, Image, Path, Transformer } from 'react-konva';
 import useImage from 'use-image';
-import svgImage from '../src/assets/simbolo_stella.svg'
+import path from '../src/assets/simbolo_stella.js'
 
 const MyImage = props => {
-  const [image] = useImage(svgImage);
-  return <Image
-    image={image}
+  // const [image] = useImage(svgImage);
+  // return <Image
+  //   image={image}
+  //   x={300}
+  //   draggable={true}
+  //   scale={0.2}
+  //   onDragStart={props.dragStart}
+  //   onDragEnd={props.dragEnd} />
+  return <Path
     x={300}
+    y={50}
+    fill="#89b717"
+    data={path}
     draggable={true}
-    scale={0.2}
     onDragStart={props.dragStart}
-    onDragEnd={props.dragEnd} />
+    onDragEnd={props.dragEnd}
+  />
 }
 
 const App = () => {
