@@ -37,6 +37,7 @@
     ]
   },
   "devDependencies": {
+    "file-loader": "^6.0.0",
     "gh-pages": "^2.2.0"
   },
   "homepage": "http://joachim-oyo.github.io/baytogether-art"

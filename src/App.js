@@ -4,10 +4,17 @@ import './App.css';
 import Konva from 'konva';
 import { Stage, Layer, Star, Text, Image, Transformer } from 'react-konva';
 import useImage from 'use-image';
+import svgImage from '../src/assets/simbolo_stella.svg'
 
 const MyImage = props => {
-  const [image] = useImage('https://www.stickpng.com/assets/images/5847f9cbcef1014c0b5e48c8.png');
-  return <Image image={image} x={300} draggable={true} scale={0.2} onSelect={() => console.log('selected')} onChange={() => console.log('changed')} />
+  const [image] = useImage(svgImage);
+  return <Image
+    image={image}
+    x={300}
+    draggable={true}
+    scale={0.2}
+    onDragStart={props.dragStart}
+    onDragEnd={props.dragEnd} />
 }
 
 const App = () => {
@@ -58,7 +65,7 @@ const App = () => {
             onDragEnd={handleDragEnd}
           />
         ))}
-        <MyImage />
+        <MyImage dragStart={handleDragStart} dragEnd={handleDragEnd} />
       </Layer>
     </Stage>
   );
