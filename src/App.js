@@ -1,28 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { render } from 'react-dom';
 import './App.css';
 import Konva from 'konva';
-import { Stage, Layer, Star, Text, Image, Path, Transformer } from 'react-konva';
-import useImage from 'use-image';
-import path from '../src/assets/simbolo_stella.js'
+import { Stage, Layer, Text, Path, Transformer } from 'react-konva';
+import svgPaths from '../src/assets/svgPaths.js'
 
-const MyImage = props => {
-  // const [image] = useImage(svgImage);
-  // return <Image
-  //   image={image}
-  //   x={300}
-  //   draggable={true}
-  //   scale={0.2}
-  //   onDragStart={props.dragStart}
-  //   onDragEnd={props.dragEnd} />
+const Shape = props => {
+  // const shapeRef = useRef();
+  // const trRef = useRef();
+
+  // React.useEffect(() => {
+  //   if (isSelected) {
+  //     // we need to attach transformer manually
+  //     trRef.current.setNode(shapeRef.current);
+  //     trRef.current.getLayer().batchDraw();
+  //   }
+  // }, [isSelected]);
+
   return <Path
+    key={props.key}
     x={300}
     y={50}
-    fill="#89b717"
-    data={path}
+    fill="green"
+    data={svgPaths[props.index].toString()}
     draggable={true}
-    onDragStart={props.dragStart}
-    onDragEnd={props.dragEnd}
+    onDragStart={props.onDragStart}
+    onDragEnd={props.onDragEnd}
   />
 }
 
@@ -30,7 +33,7 @@ const App = () => {
   const handleDragStart = e => {
     e.target.setAttrs({
       shadowColor: "black",
-      shadowOpacity: 0.6,
+      shadowOpacity: 0.3,
       shadowBlur: 10,
       shadowOffset: {
         x: 15,
@@ -57,24 +60,14 @@ const App = () => {
   return (
     <Stage width={window.innerWidth} height={window.innerHeight}>
       <Layer>
-        <Text text="Try to drag a star" />
-        {[...Array(10)].map((_, i) => (
-          <Star
-            key={i}
-            x={Math.random() * window.innerWidth}
-            y={Math.random() * window.innerHeight}
-            numPoints={5}
-            innerRadius={20}
-            outerRadius={40}
-            fill="#89b717"
-            opacity={0.8}
-            draggable
-            rotation={Math.random() * 180}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          />
+        <Text text="Have fun with #baytogether!" />
+        {svgPaths.map((_, i) => (
+          <Shape 
+          key={i}
+          index={i}
+          onDragStart={handleDragStart} 
+          onDragEnd={handleDragEnd} />
         ))}
-        <MyImage dragStart={handleDragStart} dragEnd={handleDragEnd} />
       </Layer>
     </Stage>
   );
