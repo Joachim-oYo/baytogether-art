@@ -1,20 +1,21 @@
 import React from 'react';
-import { render } from 'react-dom';
 import './App.css';
 import Konva from 'konva';
-import { Stage, Layer, Text, Path, Transformer, Rect } from 'react-konva';
+import { Stage, Layer, Text, Path, Transformer } from 'react-konva';
 import svgPaths from '../src/assets/svgPaths.js'
 
+let dragAnimationEnded = true;
+let timeout;
+
 const Shape = props => {
-  const { shapeProps, isSelected, onSelect, onChange } = props;
+  const { shapeStyle, isSelected, onSelect, onChange } = props;
   const shapeRef = React.useRef();
   const trRef = React.useRef();
 
   React.useEffect(() => {
-    console.log(trRef)
     if (isSelected) {
       // we need to attach transformer manually
-      trRef.current.setNode(shapeRef.current);
+      trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
   }, [isSelected]);
@@ -22,25 +23,24 @@ const Shape = props => {
   return (
     <React.Fragment>
       <Path
-        key={props.key}
         // x={300}
         // y={50}
-        fill="green"
+        // fill="green"
+        {...shapeStyle}
         data={props.path}
         draggable
         onClick={onSelect}
         onTap={onSelect}
         ref={shapeRef}
-        {...shapeProps}
+        onDragStart={props.onDragStart}
         onDragEnd={e => {
           onChange({
-            ...shapeProps,
+            ...shapeStyle,
             x: e.target.x(),
             y: e.target.y()
           });
+          props.onDragEnd(e);
         }}
-        onDragStart={props.onDragStart}
-        onDragEnd={props.onDragEnd}
         onTransformEnd={e => {
           // transformer is changing scale of the node
           // and NOT its width or height
@@ -51,15 +51,15 @@ const Shape = props => {
           const scaleY = node.scaleY();
 
           // we will reset it back
-          node.scaleX(1);
-          node.scaleY(1);
+          // node.scaleX(1);
+          // node.scaleY(1);
           onChange({
-            ...shapeProps,
+            ...shapeStyle,
             x: node.x(),
             y: node.y(),
             // set minimal value
-            width: Math.max(5, node.width() * scaleX),
-            height: Math.max(node.height() * scaleY)
+            // width: Math.max(5, node.width() * scaleX),
+            // height: Math.max(node.height() * scaleY)
           });
         }}
       />
@@ -68,9 +68,9 @@ const Shape = props => {
           ref={trRef}
           boundBoxFunc={(oldBox, newBox) => {
             // limit resize
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
+            // if (newBox.width < 5 || newBox.height < 5) {
+            //   return oldBox;
+            // }
             return newBox;
           }}
         />
@@ -82,6 +82,7 @@ const Shape = props => {
 const App = () => {
   const [shapes, setShapes] = React.useState([{}]);
   const [selectedId, selectShape] = React.useState(null);
+  let shouldMinimize = false;
 
   const checkDeselect = e => {
     // deselect when clicked on empty area
@@ -92,31 +93,68 @@ const App = () => {
   };
 
   const handleDragStart = e => {
+    const newScale = { x: e.target.attrs.scaleX, y: e.target.attrs.scaleY }
+    shouldMinimize = dragAnimationEnded;
+    if (dragAnimationEnded) {
+      if (e.target.attrs.scaleX) {
+        newScale.x = newScale.x * 1.05
+      }
+      else {
+        newScale.x = 1;
+      }
+      if (e.target.attrs.scaleY) {
+        newScale.y = newScale.x * 1.05
+      }
+      else {
+        newScale.y = 1;
+      }
+    }
+
     e.target.setAttrs({
       shadowColor: "black",
       shadowOpacity: 0.3,
       shadowBlur: 10,
       shadowOffset: {
-        x: 15,
-        y: 15
+        x: 8,
+        y: 8
       },
-      scaleX: 1.1,
-      scaleY: 1.1
+      scaleX: newScale.x,
+      scaleY: newScale.y
     });
+
   };
-  const handleDragEnd = e => {
+  const handleDragEnd = async e => {
+    clearTimeout(timeout);
+    const newScale = {};
+    if (shouldMinimize) {
+      if (e.target.attrs.scaleX) {
+        newScale.x = e.target.attrs.scaleX / 1.05
+      }
+      if (e.target.attrs.scaleY) {
+        newScale.y = e.target.attrs.scaleY / 1.05
+      }
+    }
+    else {
+      newScale.x = e.target.attrs.scaleX;
+      newScale.y = e.target.attrs.scaleY;
+    }
+
     e.target.setAttrs({
       shadowOpacity: 0
     });
     e.target.to({
       duration: 0.5,
       easing: Konva.Easings.ElasticEaseOut,
-      scaleX: 1,
-      scaleY: 1,
+      scaleX: newScale.x,
+      scaleY: newScale.y,
       shadowOffsetX: 0,
       shadowOffsetY: 0,
       shadowBlur: 0
     });
+
+    // setTimeout
+    dragAnimationEnded = false;
+    timeout = setTimeout(() => dragAnimationEnded = true, 500);
   };
   return (
     <Stage
@@ -130,7 +168,10 @@ const App = () => {
           <Shape
             key={i}
             path={path.data.toString()}
+            shapeStyle={{ fill: "green" }}
             isSelected={path.id === selectedId}
+            scaleX={1}
+            scaleY={1}
             onSelect={() => {
               selectShape(path.id);
             }}
@@ -139,8 +180,8 @@ const App = () => {
               shapes[i] = newAttrs;
               setShapes(shapes);
             }}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd} 
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           />
         ))}
       </Layer>
