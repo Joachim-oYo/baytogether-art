@@ -2,10 +2,13 @@ import React from 'react';
 import './App.css';
 import Konva from 'konva';
 import { Stage, Layer, Text, Path, Transformer } from 'react-konva';
-import svgPaths from '../src/assets/svgPaths.js'
+import svgPaths from './data/svgPaths.js'
+import colors from './data/colors.js'
+import initialPositions from './data/initialPositions.js'
 
 let dragAnimationEnded = true;
 let timeout;
+const randomNum = Math.random();
 
 const Shape = props => {
   const { shapeStyle, isSelected, onSelect, onChange } = props;
@@ -23,8 +26,6 @@ const Shape = props => {
   return (
     <React.Fragment>
       <Path
-        // x={300}
-        // y={50}
         // fill="green"
         {...shapeStyle}
         data={props.path}
@@ -156,36 +157,47 @@ const App = () => {
     dragAnimationEnded = false;
     timeout = setTimeout(() => dragAnimationEnded = true, 500);
   };
+
+  const randomIndex = Math.floor(randomNum*colors.length);
+  const backgroundColor = colors[randomIndex];
+  const initialShapeColors = [...colors];
+  initialShapeColors.splice(randomIndex, 1);
+
   return (
-    <Stage
-      width={window.innerWidth}
-      height={window.innerHeight}
-      onMouseDown={checkDeselect}
-      onTouchStart={checkDeselect}>
-      <Layer>
-        <Text text="Have fun with #baytogether!" />
-        {svgPaths.map((path, i) => (
-          <Shape
-            key={i}
-            path={path.data.toString()}
-            shapeStyle={{ fill: "green" }}
-            isSelected={path.id === selectedId}
-            scaleX={1}
-            scaleY={1}
-            onSelect={() => {
-              selectShape(path.id);
-            }}
-            onChange={newAttrs => {
-              const shapes = svgPaths.slice();
-              shapes[i] = newAttrs;
-              setShapes(shapes);
-            }}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          />
-        ))}
-      </Layer>
-    </Stage>
+      <Stage
+        style={{ backgroundColor: backgroundColor }}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        onMouseDown={checkDeselect}
+        onTouchStart={checkDeselect}>
+        <Layer>
+          <Text text="Have fun with #baytogether!" />
+          {svgPaths.map((path, i) => (
+            <Shape
+              key={i}
+              path={path.data.toString()}
+              shapeStyle={{
+                x: initialPositions[i].x,
+                y: initialPositions[i].y,
+                fill: initialShapeColors[i % initialShapeColors.length]
+              }}
+              isSelected={path.id === selectedId}
+              scaleX={1}
+              scaleY={1}
+              onSelect={() => {
+                selectShape(path.id);
+              }}
+              onChange={newAttrs => {
+                const shapes = svgPaths.slice();
+                shapes[i] = newAttrs;
+                setShapes(shapes);
+              }}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            />
+          ))}
+        </Layer>
+      </Stage>
   );
 }
 
