@@ -8,8 +8,13 @@ import initialPositions from './data/initialPositions.js'
 import useImage from 'use-image';
 
 let dragAnimationEnded = true;
+let shouldMinimize = false;
 let timeout;
 const randomNum = Math.random();
+const randomIndex = Math.floor(randomNum * colors.length);
+const backgroundColor = colors[randomIndex];
+const initialShapeColors = [...colors];
+initialShapeColors.splice(randomIndex, 1);
 
 const ColorSelector = props => {
   const { src, position, scale } = props;
@@ -41,7 +46,11 @@ const Shape = props => {
   return (
     <React.Fragment>
       <Path
-        // fill="green"
+        // scaleX={props.scaleX}
+        // scaleY={props.scaleY}
+        // key={props.name}
+        name={props.name}
+        index={props.index}
         {...shapeStyle}
         data={props.path}
         draggable
@@ -98,7 +107,18 @@ const Shape = props => {
 const App = () => {
   const [shapes, setShapes] = React.useState([{}]);
   const [selectedId, selectShape] = React.useState(null);
-  let shouldMinimize = false;
+
+  const generateShapes = () => {
+    const shapes = [];
+    for (let i = 0; i < svgPaths.length; i++) {
+      shapes.push({
+        id: 'node-' + i
+      });
+    }
+    return shapes;
+  }
+
+  const [renderShapes, setRenderShapes] = React.useState(generateShapes());
 
   const checkDeselect = e => {
     // deselect when clicked on empty area
@@ -109,6 +129,24 @@ const App = () => {
   };
 
   const handleDragStart = e => {
+    // Adjust layer order of item
+    const id = e.target.name();
+    const items = renderShapes.slice();
+    const item = items.find(i => i.id === id);
+    const index = items.indexOf(item);
+    console.log(e.target)
+    // console.log(index)
+
+    if (index !== -1) {
+      // remove from the list:
+      items.splice(index, 1);
+      // add to the top
+      items.push(item);
+      setRenderShapes(items);
+    }
+
+    console.log(renderShapes)
+
     const newScale = { x: e.target.attrs.scaleX, y: e.target.attrs.scaleY }
     shouldMinimize = dragAnimationEnded;
     if (dragAnimationEnded) {
@@ -139,7 +177,8 @@ const App = () => {
     });
 
   };
-  const handleDragEnd = async e => {
+
+  const handleDragEnd = e => {
     clearTimeout(timeout);
     const newScale = {};
     if (shouldMinimize) {
@@ -173,14 +212,7 @@ const App = () => {
     timeout = setTimeout(() => dragAnimationEnded = true, 500);
   };
 
-  const randomIndex = Math.floor(randomNum * colors.length);
-  const backgroundColor = colors[randomIndex];
-  const initialShapeColors = [...colors];
-  initialShapeColors.splice(randomIndex, 1);
-
   return (
-
-
     // Drawing Stage
     <Stage
       // style={{ backgroundColor: backgroundColor, border: '1px solid grey'}}
@@ -192,23 +224,25 @@ const App = () => {
         <Rect
           width={1200}
           height={700}
-          fill="green"
+          fill={backgroundColor}
         />
-        <Text text="Have fun with #baytogether!" />
-        {svgPaths.map((path, i) => (
+        {renderShapes.map((shape, i) => (
           <Shape
             key={i}
-            path={path.data.toString()}
+            index={i}
+            name={shape.id}
+            path={svgPaths[i].data.toString()}
             shapeStyle={{
-              x: initialPositions[i].x,
-              y: initialPositions[i].y,
+              x: 1200 * (i / svgPaths.length),
+              y: 700 + 34,
               fill: initialShapeColors[i % initialShapeColors.length]
+              // fill: "green"
             }}
-            isSelected={path.id === selectedId}
+            isSelected={svgPaths[i].id === selectedId}
             scaleX={1}
             scaleY={1}
             onSelect={() => {
-              selectShape(path.id);
+              selectShape(svgPaths[i].id);
             }}
             onChange={newAttrs => {
               const shapes = svgPaths.slice();
@@ -219,12 +253,14 @@ const App = () => {
             onDragEnd={handleDragEnd}
           />
         ))}
+
         {colorImages.map((imageSrc, i) => (
           <ColorSelector
+            key={i}
             src={imageSrc}
             position={{
               x: 1200 + 34 + 150 * (i % 3),
-              y: 34 + 130*(Math.floor(i/3))
+              y: 34 + 130 * (Math.floor(i / 3))
             }}
             scale={{
               x: 0.7,
