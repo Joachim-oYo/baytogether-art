@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/baytogether-art/precache-manifest.fddae8915240ea88c49f69aa65b15951.js"
+  "/baytogether-art/precache-manifest.8f40e28f1380ea4a71f9ca54f09d6e50.js"
 );
 
 self.addEventListener('message', (event) => {
